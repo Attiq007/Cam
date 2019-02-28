@@ -4,124 +4,27 @@ from datetime import datetime
 
 app = Flask(__name__)
 
+#==================================  Default Route  ====================================
 @app.route('/')
 def index():
 	return render_template('index.html')
-'''
-@app.route('/api/v1/camera/register', methods=['GET', 'POST'])
-def cam_reg():
 
-	if request.method == 'POST':
-		print(request.data)
-
-		return Res('This is POST request')
-
-	else:
-		print(request.data)
-
-		return print('This is GET request')
-'''
-
-'''
-@app.route('/api/v1/camera/register', methods=['GET', 'POST'])
-def cam_reg():
-
-	if request.method == 'POST':
-		print(request.headers)
-
-		return print('This is POST request')
-
-	else:
-		print(request.headers)
-
-		return print('This is GET request')
-'''
-
-'''  =================  BASIC  ====================
-@app.route('/api/v1/camera/passenger/basic', methods=['GET', 'POST'])
-def cam_basic():
-
-	if request.method == 'POST':
-		print(request.headers)
-
-		return print('This is POST request')
-
-	else:
-		print(request.headers)
-
-		return print('This is GET request')
-'''
-
-'''  ============================  LATEST RESGISTER   ===================================
-@app.route('/api/v1/camera/register', methods=['GET', 'POST'])
-def cam_reg():
-
-	if request.method == 'GET':
-		data = request.stream.read()
-
-		return data
-'''
-
-
-'''
-@app.route('/api/v1/camera/passenger/basic', methods=['GET'])
-def cam_basic():
-
-	data = request.get_json()
-
-	id = data['id']
-	face_type = data['face_type']
-	age = data['age']
-	gender = data['gender']
-
-	return jsonify({'result' : 'Success!', 'id' : id, 'face_type' : face_type, 'age' : age, 'gender' : gender})
-'''
-
-
-
-''' if request.method == 'GET':
-		res = request.get_data()
-
-		return res 
-
-'''
-
-'''  ==================================     BASIC LATEST     ================================'''
-
-'''@app.route('/passenger/basic', methods=['GET', 'POST'])
-@app.route('/passenger/face', methods=['GET', 'POST'])'''
-'''
-@app.route('/passenger/<name>', methods=['GET', 'POST'])
-def cam_data(name):
-
-	print (request.get_json())
-	response = {
-   			"success":"true",
-   			"msg":"ok"
-		}
-	return jsonify(response)
-
-
-
-@app.route('/passenger/<username>', methods=['GET', 'POST'])
-def cam_basic():
-	print(request.get_json())
-	response = {
-   			"success":"true",
-   			"msg":"ok"
-		}
-	return jsonify(response)
-
-
-
-'''
-
+#========================================  Basic(data points) API  =====================
 @app.route('/passenger/basic', methods=['GET', 'POST'])
 def cam_basic():
 	data = request.get_json()
+
+	print("\n============================  Token ==============================\n")
+
+	print("\nThe token is : ", request.headers['Authorization'])
+	print("\n")
+	print(request.headers)
+	
+	print("\n============================  End Token ==============================\n")
+
 	print("\n============================  Basic ==============================\n")
 	
-	#print(data)
+	print(data)
 
 	id = data['id']
 	age = data['age']
@@ -158,43 +61,49 @@ def cam_basic():
 	print("\n")
 	print("\n==========================  End Basic ============================\n")
 
-	'''
-	for firstkey, big_list in dict.items():
-    	print('print dict: ' + str(firstkey))
-    for pair in big_list:
-        print('print sets in dict: ' + str(pair))
-        nextdict = pair
-        for nextkey, small_list in nextdict.items():
-            print('print each: ' + str(nextkey)+ '->' + str(small_list))
-            #address each one
-            print('pull just data: ' + str(nextdict[nextkey]))
-	'''
 	response = {
    			"success":"true",
    			"msg":"ok"
 		}
 	return jsonify(response)
 
-
+#========================================  Face API  ================================
 @app.route('/passenger/face', methods=['GET', 'POST'])
 def cam_face():
 	
-	data = request.get_json()
+	info = request.get_json()
 	print("\n============================  Face ==============================\n")
-	#print (data)
+	#print (info)
 	print("\n")
 
-	id = data['id']
-	vasid = data['vasid']
-	channel = data['channel']
-	face_pic = data['face_pic']
-	#Face properties
+	id = info['id']
+	vasid = info['vasid']
+	channel = info['channel']
+	face_pic = info['face_pic']
 
 	print('Id is : ', id)
 	print('Vasid is : ', vasid)
 	print('Channel is : ', channel)
+	print("==============================  Raw Face Pic  =========================\n")
 	print('Face_pic is : ', face_pic)
-	print("\n")
+	print("==============================  End Raw Face Pic  =========================\n")
+	print("\n\n")
+
+	for fp in face_pic:
+		data = fp['data']
+		face_score = fp['face_score']
+		filename = fp['filename']
+		key_point = fp['key_point']
+		type = fp['type']
+		print('Data is : ', data)
+		print("\n")
+		print('Face Score is : ', face_score)
+		print('Filename is : ', filename)
+		print('Key point is : ', key_point)
+		print('Type is : ', type)
+		print("\n") 
+
+
 	print("\n==========================  End Face ============================\n")
 
 	response = {
@@ -203,24 +112,41 @@ def cam_face():
 		}
 	return jsonify(response)
 
+#=======================================  Body API  ====================================
 @app.route('/passenger/body', methods=['GET', 'POST'])
 def cam_body():
 	
-	data = request.get_json()
+	info = request.get_json()
 	print("\n============================  Body ==============================\n")
-	#print (data)
+	#print (info)
 	print("\n")
 
-	id = data['id']
-	vasid = data['vasid']
-	channel = data['channel']
-	body_pic = data['body_pic']
+	id = info['id']
+	vasid = info['vasid']
+	channel = info['channel']
+	body_pic = info['body_pic']
 
 	print('Id is : ', id)
 	print('Vasid is : ', vasid)
 	print('Channel is : ', channel)
+	print("==============================  Raw Body Pic  =========================\n")
 	print('Body_pic is : ', body_pic)
+	print("==============================  End Raw Body Pic  =========================\n")
 	print("\n")
+
+	for bp in body_pic:
+		body_roi = bp['body_roi']
+		data = bp['data']
+		face_roi = bp['face_roi']
+		filename = bp['filename']
+		print("\n")
+		print('Body Roi is : ', body_roi)
+		print('Data is : ', data)
+		print('Face Roi is : ', face_roi)
+		print('Filename is : ', filename)
+		print("\n")
+
+
 	print("\n========================== End Body ============================\n")
 
 	response = {
@@ -229,6 +155,7 @@ def cam_body():
 		}
 	return jsonify(response)
 
+#================================ API not hitting so far  ===============================
 @app.route('/passenger/feature', methods=['GET', 'POST'])
 def cam_feature():
 
@@ -244,7 +171,7 @@ def cam_feature():
 		}
 	return jsonify(response)
 
-
+#====================================  API not hitting so far  ===========================
 @app.route('/passenger', methods=['GET', 'POST'])
 def cam_passenger():
 
@@ -260,7 +187,7 @@ def cam_passenger():
 		}
 	return jsonify(response)
 
-
+#=====================================  API not hitting so far  ==========================
 @app.route('/thermodynamicChartBaseMap', methods=['GET', 'POST'])
 def cam_chartBasemap():
 
@@ -276,6 +203,7 @@ def cam_chartBasemap():
 		}
 	return jsonify(response)
 
+#======================================  API not hitting so far  ==========================
 @app.route('/thermodynamicChartData', methods=['GET', 'POST'])
 def cam_chartData():
 
@@ -291,7 +219,7 @@ def cam_chartData():
 		}
 	return jsonify(response)
 
-
+#===================================  Device Register API  =====================================
 @app.route('/register', methods=['GET', 'POST'])
 def cam_reg():
 
@@ -305,7 +233,45 @@ def cam_reg():
 		return response
 	else:
 		print("\n============================  Register Request  =============================\n")
-		print(request.get_json())
+
+		data = request.get_json()
+		#channel1 = 0
+		#channel2 = 0
+		#channel3 = 0
+		#channel4 = 0
+
+		print(data)
+		print("\n")
+
+		serialnum = data['serialnum']
+		name = data['name']
+		channelcount = data['channelcount']
+		channeltype = data['channeltype']
+		devicetype = data['devicetype']
+		ip = data['ip']
+		mac = data['mac']
+		hardware = data['hardware']
+		software = data['software']
+		algorithm = data['algorithm']
+		channel1 = channeltype['channel1']
+
+		#for ch in channeltype:
+		#	channel1 = ch['channel1']
+
+
+		print('Serial number is : ', serialnum)
+		print('Name is : ', name)
+		print('Channel count is : ', channelcount)
+		print('Channel type is : ', channeltype)
+		print('Channel1 is : ', channel1)
+		print('Device type is : ', devicetype)
+		print('Ip is : ', ip)
+		print('Mac is : ', mac)
+		print('Hardware is : ', hardware)
+		print('Software is : ', software)
+		print('Algorithm : ', algorithm)
+		print("\n")
+
 		response = {        
    			"success":"true",
    			"token":"eryui34987321i",
@@ -315,35 +281,7 @@ def cam_reg():
 		print("\n==========================  End Register Request  ===========================\n")
 		return jsonify(response)
 
-'''   ============================  BASIC INFO JSON ret "NULL"  =================================
-
-@app.route('/api/v1/camera/passenger/basic', methods=['GET', 'POST'])
-def cam_basic():
-
-	if request.method == 'GET':
-		data = request.stream.read()
-
-		return data
-
-	else:
-		print(request.headers)
-
-		return print('This is POST request')
-
-
-'''
-
-'''
-@app.route('/api/v1/camera/register', methods=['GET', 'POST'])
-def cam_reg():
-
-	if request.method == 'GET':
-		res = request.data
-
-		return jsonify(res)
-'''
-
-
+#==============================  Get Request Time API ====================================
 @app.route('/api/v1/camera/time', methods=['GET'])
 def cam_time():
     response = {
@@ -356,7 +294,7 @@ def cam_time():
 }
     return jsonify(response)
 
-
+#=========================  Test Route  ===================================
 @app.route('/check')
 def check():
 	return print('This is just for Check')
