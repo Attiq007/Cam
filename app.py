@@ -4,7 +4,6 @@ from flask import request, redirect, url_for, render_template, jsonify
 from datetime import datetime
 import os, binascii, uuid
 
-
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:a007@localhost/camera'
@@ -21,7 +20,6 @@ def index():
 #===================================  Device Register API  =====================================
 @app.route('/register', methods=['GET', 'POST'])
 def cam_reg():
-
 	if request.method == 'GET':
 
 		response = {        
@@ -77,15 +75,15 @@ def cam_reg():
 
 		#========================================  Data Manipulation  ==========================================
 		register = Register.query.filter_by(serial_no=serialnum).first()
-	    
-	    if register:
-	        register.last_updated=datetime.now()
-	        register.token=uid1
-	        db.session.commit()
-	    else:
-	    	reg = Register(serial_no=serialnum, channel_count=channelcount, channel1=channel1, token=uid1, last_created=datetime.now(), last_updated=datetime.now(), name=name, device_type=device_type, mac=mac, ip=ip, hardware=hardware, software=software, algorithm=algorithm)
-        	db.session.add(reg)
-        	db.session.commit()
+
+		if register:
+			register.last_updated=datetime.now()
+			register.token=uid1
+			db.session.commit()
+		else:
+			reg = Register(serial_no=serialnum, channel_count=channelcount, channel1=channel1, token=uid1, last_created=datetime.now(), last_updated=datetime.now(), name=name, device_type=devicetype, mac=mac, ip=ip, hardware=hardware, software=software, algorithm=algorithm)
+			db.session.add(reg)
+			db.session.commit()
 
 		response = {        
    			"success":"true",
@@ -93,7 +91,9 @@ def cam_reg():
    			"code":123,
    			"msg":"ok"        
 		}
+
 		print("\n==========================  End Register Request  ===========================\n")
+
 		return jsonify(response)
 
 #========================================  Basic(data points) API  =====================
@@ -154,35 +154,36 @@ def cam_basic():
 
 	result = Register.query.filter_by(serial_no=vasid).first()
 	token = result.token
+	db.session.rollback()
 	if (token == auth):
 		snapshot = Snapshot.query.filter_by(id=id).first()
 		if snapshot:
 			#==================  date update  ===================
-        	snapshot.last_updated=datetime.now()
-	        db.session.commit()
+			snapshot.last_updated=datetime.now()
+			db.session.commit()
 	        #==================  Entry in Basic Table  ==========
 			bas = Basic(snap_id=id, age=age, direction=direction, face_direction=face_direction, face_type=face_type, gender=gender, match_score=matchscore, mood=mood, start_time=start_time, track_length=track_length, track_type=track_type)
 			db.session.add(bas)
-        	db.session.commit()
+			db.session.commit()
         	
-	    else:
+		else:
 	    	#==================  Entry in Snapshot Table  =======
-	    	ss = Snapshot(id=id, vasid=vasid, channel=channel, last_created=datetime.now(), last_updated=datetime.now())
-	    	db.session.add(ss)
-        	db.session.commit()
+			ss = Snapshot(id=id, vasid=vasid, channel=channel, last_created=datetime.now(), last_updated=datetime.now())
+			db.session.add(ss)
+			db.session.commit()
 	        #==================  Entry in Basic Table  ==========
 			bas = Basic(snap_id=id, age=age, direction=direction, face_direction=face_direction, face_type=face_type, gender=gender, match_score=matchscore, mood=mood, start_time=start_time, track_length=track_length, track_type=track_type)
 			db.session.add(bas)
-        	db.session.commit()
+			db.session.commit()
 
-        response = {	
-   			"success":"true",
-   			"code":123,
-   			"msg":"ok"
+		response = {	
+			"success":"true",
+			"code":123,
+			"msg":"ok"
 		}
 	else:
 		response = {	
-   			"code":401
+			"code":401
 		}
 
 	return jsonify(response)
@@ -216,12 +217,13 @@ def cam_face():
 
 	result = Register.query.filter_by(serial_no=vasid).first()
 	token = result.token
+	db.session.rollback()
 	if (token == auth):
 		snapshot = Snapshot.query.filter_by(id=id).first()
 		if snapshot:
 			#==================  date update  ===================
-        	snapshot.last_updated=datetime.now()
-	        db.session.commit()
+			snapshot.last_updated=datetime.now()
+			db.session.commit()
 	        #==================  Entry in Face Table  ==========
 			for fp in face_pic:
 				data = fp['data']
@@ -231,12 +233,12 @@ def cam_face():
 				type = fp['type']
 				face = Face(snap_id=id, data=data, face_score=face_score, filename=filename, type=type)
 				db.session.add(face)
-	        	db.session.commit()
-        else:
+				db.session.commit()
+		else:
 	    	#==================  Entry in Snapshot Table  =======
-	    	ss = Snapshot(id=id, vasid=vasid, channel=channel, last_created=datetime.now(), last_updated=datetime.now())
-	    	db.session.add(ss)
-        	db.session.commit()
+			ss = Snapshot(id=id, vasid=vasid, channel=channel, last_created=datetime.now(), last_updated=datetime.now())
+			db.session.add(ss)
+			db.session.commit()
 	        #==================  Entry in Face Table  ==========
 			for fp in face_pic:
 				data = fp['data']
@@ -246,16 +248,16 @@ def cam_face():
 				type = fp['type']
 				face = Face(snap_id=id, data=data, face_score=face_score, filename=filename, type=type)
 				db.session.add(face)
-	        	db.session.commit()
+				db.session.commit()
 
-	    response = {	
-   			"success":"true",
-   			"code":123,
-   			"msg":"ok"
+		response = {	
+			"success":"true",
+			"code":123,
+			"msg":"ok"
 		}
 	else:
 		response = {	
-   			"code":401
+			"code":401
 		}
 
 	'''for fp in face_pic:
@@ -308,12 +310,13 @@ def cam_body():
 
 	result = Register.query.filter_by(serial_no=vasid).first()
 	token = result.token
+	db.session.rollback()
 	if (token == auth):
 		snapshot = Snapshot.query.filter_by(id=id).first()
 		if snapshot:
 			#==================  date update  ===================
-        	snapshot.last_updated=datetime.now()
-	        db.session.commit()
+			snapshot.last_updated=datetime.now()
+			db.session.commit()
 	        #==================  Entry in Body Table  ==========
 			for bp in body_pic:
 				body_roi = bp['body_roi']
@@ -322,12 +325,12 @@ def cam_body():
 				filename = bp['filename']
 				body = Body(snap_id=id, data=data, filename=filename)
 				db.session.add(body)
-	        	db.session.commit()
-        else:
+				db.session.commit()
+		else:
 	    	#==================  Entry in Snapshot Table  =======
-	    	ss = Snapshot(id=id, vasid=vasid, channel=channel, last_created=datetime.now(), last_updated=datetime.now())
-	    	db.session.add(ss)
-        	db.session.commit()
+			ss = Snapshot(id=id, vasid=vasid, channel=channel, last_created=datetime.now(), last_updated=datetime.now())
+			db.session.add(ss)
+			db.session.commit()
 	        #==================  Entry in Body Table  ==========
 			for bp in body_pic:
 				body_roi = bp['body_roi']
@@ -336,16 +339,16 @@ def cam_body():
 				filename = bp['filename']
 				body = Body(snap_id=id, data=data, filename=filename)
 				db.session.add(body)
-	        	db.session.commit()
+				db.session.commit()
 
-	    response = {	
-   			"success":"true",
-   			"code":123,
-   			"msg":"ok"
+		response = {	
+			"success":"true",
+			"code":123,
+			"msg":"ok"
 		}
 	else:
 		response = {	
-   			"code":401
+			"code":401
 		}
 
 	'''for bp in body_pic:
@@ -362,8 +365,8 @@ def cam_body():
 	print("\n========================== End Body ============================\n")
 
 	response = {
-   			"success":"true",
-   			"msg":"ok"
+			"success":"true",
+			"msg":"ok"
 		}
 	return jsonify(response)
 
