@@ -157,18 +157,34 @@ def cam_basic():
 	if (token == auth):
 		snapshot = Snapshot.query.filter_by(id=id).first()
 		if snapshot:
+			#==================  date update  ===================
+        	snapshot.last_updated=datetime.now()
+	        db.session.commit()
+	        #==================  Entry in Basic Table  ==========
 			bas = Basic(snap_id=id, age=age, direction=direction, face_direction=face_direction, face_type=face_type, gender=gender, match_score=matchscore, mood=mood, start_time=start_time, track_length=track_length, track_type=track_type)
-			#date update
+			db.session.add(bas)
+        	db.session.commit()
+        	
+	    else:
+	    	#==================  Entry in Snapshot Table  =======
+	    	ss = Snapshot(id=id, vasid=vasid, channel=channel, last_created=datetime.now(), last_updated=datetime.now())
+	    	db.session.add(ss)
+        	db.session.commit()
+	        #==================  Entry in Basic Table  ==========
+			bas = Basic(snap_id=id, age=age, direction=direction, face_direction=face_direction, face_type=face_type, gender=gender, match_score=matchscore, mood=mood, start_time=start_time, track_length=track_length, track_type=track_type)
+			db.session.add(bas)
+        	db.session.commit()
+
+        response = {	
+   			"success":"true",
+   			"code":123,
+   			"msg":"ok"
+		}
 	else:
 		response = {	
    			"code":401
 		}
 
-	response = {	
-   			"success":"true",
-   			"code":123,
-   			"msg":"ok"
-		}
 	return jsonify(response)
 
 #========================================  Face API  ================================
@@ -176,6 +192,9 @@ def cam_basic():
 def cam_face():
 	
 	info = request.get_json()
+
+	auth = request.headers['Authorization']
+
 	print("\n============================  Face ==============================\n")
 	#print (info)
 	print("\n")
@@ -193,7 +212,53 @@ def cam_face():
 	print("==============================  End Raw Face Pic  =========================\n")
 	print("\n\n")
 
-	for fp in face_pic:
+	#========================================  Data Manipulation  ==========================================
+
+	result = Register.query.filter_by(serial_no=vasid).first()
+	token = result.token
+	if (token == auth):
+		snapshot = Snapshot.query.filter_by(id=id).first()
+		if snapshot:
+			#==================  date update  ===================
+        	snapshot.last_updated=datetime.now()
+	        db.session.commit()
+	        #==================  Entry in Face Table  ==========
+			for fp in face_pic:
+				data = fp['data']
+				face_score = fp['face_score']
+				filename = fp['filename']
+				key_point = fp['key_point']
+				type = fp['type']
+				face = Face(snap_id=id, data=data, face_score=face_score, filename=filename, type=type)
+				db.session.add(face)
+	        	db.session.commit()
+        else:
+	    	#==================  Entry in Snapshot Table  =======
+	    	ss = Snapshot(id=id, vasid=vasid, channel=channel, last_created=datetime.now(), last_updated=datetime.now())
+	    	db.session.add(ss)
+        	db.session.commit()
+	        #==================  Entry in Face Table  ==========
+			for fp in face_pic:
+				data = fp['data']
+				face_score = fp['face_score']
+				filename = fp['filename']
+				key_point = fp['key_point']
+				type = fp['type']
+				face = Face(snap_id=id, data=data, face_score=face_score, filename=filename, type=type)
+				db.session.add(face)
+	        	db.session.commit()
+
+	    response = {	
+   			"success":"true",
+   			"code":123,
+   			"msg":"ok"
+		}
+	else:
+		response = {	
+   			"code":401
+		}
+
+	'''for fp in face_pic:
 		data = fp['data']
 		face_score = fp['face_score']
 		filename = fp['filename']
@@ -205,15 +270,13 @@ def cam_face():
 		print('Filename is : ', filename)
 		print('Key point is : ', key_point)
 		print('Type is : ', type)
-		print("\n") 
-
-
+		print("\n")''' 
 	print("\n==========================  End Face ============================\n")
 
-	response = {
+	'''response = {
    			"success":"true",
    			"msg":"ok"
-		}
+		}'''
 	return jsonify(response)
 
 #=======================================  Body API  ====================================
@@ -221,6 +284,9 @@ def cam_face():
 def cam_body():
 	
 	info = request.get_json()
+
+	auth = request.headers['Authorization']
+
 	print("\n============================  Body ==============================\n")
 	#print (info)
 	print("\n")
@@ -238,7 +304,51 @@ def cam_body():
 	print("==============================  End Raw Body Pic  =========================\n")
 	print("\n")
 
-	for bp in body_pic:
+	#========================================  Data Manipulation  ==========================================
+
+	result = Register.query.filter_by(serial_no=vasid).first()
+	token = result.token
+	if (token == auth):
+		snapshot = Snapshot.query.filter_by(id=id).first()
+		if snapshot:
+			#==================  date update  ===================
+        	snapshot.last_updated=datetime.now()
+	        db.session.commit()
+	        #==================  Entry in Body Table  ==========
+			for bp in body_pic:
+				body_roi = bp['body_roi']
+				data = bp['data']
+				face_roi = bp['face_roi']
+				filename = bp['filename']
+				body = Body(snap_id=id, data=data, filename=filename)
+				db.session.add(body)
+	        	db.session.commit()
+        else:
+	    	#==================  Entry in Snapshot Table  =======
+	    	ss = Snapshot(id=id, vasid=vasid, channel=channel, last_created=datetime.now(), last_updated=datetime.now())
+	    	db.session.add(ss)
+        	db.session.commit()
+	        #==================  Entry in Body Table  ==========
+			for bp in body_pic:
+				body_roi = bp['body_roi']
+				data = bp['data']
+				face_roi = bp['face_roi']
+				filename = bp['filename']
+				body = Body(snap_id=id, data=data, filename=filename)
+				db.session.add(body)
+	        	db.session.commit()
+
+	    response = {	
+   			"success":"true",
+   			"code":123,
+   			"msg":"ok"
+		}
+	else:
+		response = {	
+   			"code":401
+		}
+
+	'''for bp in body_pic:
 		body_roi = bp['body_roi']
 		data = bp['data']
 		face_roi = bp['face_roi']
@@ -248,9 +358,7 @@ def cam_body():
 		print('Data is : ', data)
 		print('Face Roi is : ', face_roi)
 		print('Filename is : ', filename)
-		print("\n")
-
-
+		print("\n")'''
 	print("\n========================== End Body ============================\n")
 
 	response = {
